@@ -45,13 +45,23 @@ router.post('/', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-  const animal = db.prepare('SELECT * FROM animals WHERE id = ?').get(req.params.id);
+  const animal = db.prepare(`
+    SELECT animals.*, paddocks.name AS paddock_name
+    FROM animals
+    LEFT JOIN paddocks ON animals.paddock_id = paddocks.id
+    WHERE animals.id = ?
+  `).get(req.params.id);
   if (!animal) return res.status(404).json({ error: 'Animal not found' });
   res.json(animal);
 });
 
 router.put('/:id', (req, res) => {
-  const animal = db.prepare('SELECT * FROM animals WHERE id = ?').get(req.params.id);
+  const animal = db.prepare(`
+    SELECT animals.*, paddocks.name AS paddock_name
+    FROM animals
+    LEFT JOIN paddocks ON animals.paddock_id = paddocks.id
+    WHERE animals.id = ?
+  `).get(req.params.id);
   if (!animal) return res.status(404).json({ error: 'Animal not found' });
 
   const updates = {
