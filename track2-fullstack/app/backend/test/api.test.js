@@ -40,6 +40,10 @@ function seedTestData() {
     'INSERT INTO paddocks (name, capacity, animal_count) VALUES (?, ?, 0)'
   ).run('South Paddock', 30).lastInsertRowid;
 
+  const holdingId = db.prepare(
+    'INSERT INTO paddocks (name, capacity, animal_count) VALUES (?, ?, 0)'
+  ).run('Holding Pen', 10).lastInsertRowid;
+
   const insertAnimal = db.prepare(
     'INSERT INTO animals (name, tag_number, breed, date_of_birth, paddock_id) VALUES (?, ?, ?, ?, ?)'
   );
@@ -107,4 +111,16 @@ test('POST /api/animals/:id/health-events creates an event', async () => {
   assert.equal(status, 201);
   assert.equal(body.event_type, 'checkup');
   assert.equal(body.animal_id, id);
+});
+
+test('POST /api/animals assigns unassigned animals to Holding Pen and increments its count', async () => {
+  const { status, body } = await post('/animals', {
+    name: 'George',
+    tag_number: 'TAG-999',
+  });
+
+  assert.equal(status, 200);
+  const holding = db.prepare('SELECT id, animal_count FROM paddocks WHERE name = ?').get('Holding Pen');
+  assert.equal(body.paddock_id, holding.id);
+  assert.equal(holding.animal_count, 1);
 });

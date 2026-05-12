@@ -5,13 +5,13 @@ const { db } = require('../db');
 router.get('/', (req, res) => {
   const page = parseInt(req.query.page) || 0;
   const limit = parseInt(req.query.limit) || 10;
-
+  const offset = page * limit;
   const animals = db.prepare(`
   SELECT animals.*, paddocks.name AS paddock_name
   FROM animals
   LEFT JOIN paddocks ON animals.paddock_id = paddocks.id
   LIMIT ? OFFSET ?
-`).all(limit, page);
+`).all(limit, offset);
 
   const result = animals.map(animal => {
     const latestEvent = db.prepare(`

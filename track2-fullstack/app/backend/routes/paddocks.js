@@ -3,7 +3,13 @@ const router = express.Router();
 const { db } = require('../db');
 
 router.get('/', (req, res) => {
-  const paddocks = db.prepare('SELECT * FROM paddocks').all();
+  const paddocks = db.prepare(`
+    SELECT p.*, COUNT(a.id) as animal_count,
+           p.name = 'Holding Pen' as is_holding_pen
+    FROM paddocks p
+    LEFT JOIN animals a ON a.paddock_id = p.id
+    GROUP BY p.id
+  `).all();
   res.json(paddocks);
 });
 
