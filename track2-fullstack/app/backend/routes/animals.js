@@ -135,3 +135,34 @@ router.post('/:id/health-events', (req, res) => {
 });
 
 module.exports = router;
+// Weight records
+router.get('/:id/weights', (req, res) => {
+  const animal = db.prepare('SELECT * FROM animals WHERE id = ?').get(req.params.id);
+  if (!animal) return res.status(404).json({ error: 'Animal not found' });
+
+  const weights = db.prepare(
+    'SELECT * FROM weight_records WHERE animal_id = ? ORDER BY date DESC'
+  ).all(req.params.id);
+  res.json(weights);
+});
+
+router.post('/:id/weights', (req, res) => {
+  const animal = db.prepare('SELECT * FROM animals WHERE id = ?').get(req.params.id);
+  if (!animal) return res.status(404).json({ error: 'Animal not found' });
+
+  const { weight_kg, date, notes } = req.body;
+
+  if (weight_kg === undefined || weight_kg === null || typeof weight_kg !== 'number' || weight_kg <= 0) {
+    return res.status(422).json({ error: 'weight_kg must be a positive number' });
+  }
+  if (!date) {
+    return res.status(422).json({ error: 'date is required' });
+  }
+
+  const result = db.prepare(
+    'INSERT INTO weight_records (animal_id, weight_kg, date, notes) VALUES (?, ?, ?, ?)'
+  ).run(req.params.id, weight_kg, date, notes ?? null);
+
+  const record = db.prepare('SELECT * FROM weight_records WHERE id = ?').get(result.lastInsertRowid);
+  res.status(201).json(record);
+});

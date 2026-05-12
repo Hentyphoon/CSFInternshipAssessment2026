@@ -54,4 +54,17 @@ animalIds.slice(0, 6).forEach((animalId, i) => {
   );
 });
 
+const insertWeight = db.prepare(
+  'INSERT INTO weight_records (animal_id, weight_kg, date, notes) VALUES (?, ?, ?, ?)'
+);
+
+animalIds.slice(0, 6).forEach((animalId, i) => {
+  insertWeight.run(
+    animalId,
+    50 + (i * 5), 
+    `2024-${String((i % 9) + 1).padStart(2, '0')}-15`,
+    `Weight record for ${animalsData[i][0]}`
+  );
+});
+
 console.log('Database seeded successfully.');

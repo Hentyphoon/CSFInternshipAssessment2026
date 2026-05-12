@@ -33,6 +33,13 @@ function initDb() {
       date       TEXT    NOT NULL,
       vet_name   TEXT
     );
+    CREATE TABLE IF NOT EXISTS weight_records (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      animal_id  INTEGER NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
+      weight_kg  REAL    NOT NULL,
+      date       TEXT    NOT NULL,
+      notes      TEXT
+    );
   `);
 }
 
